@@ -24,7 +24,7 @@
 	</div>
 </c:if>
 
-<c:if test = "${account.ruolo.name == 'ROLE_CLIENTE'}">
+<sec:authorize access="hasRole('ROLE_CLIENTE')">
 	<c:if test="${ticket.statoTicket.id == 1}">
 		<div class="pad margin no-print">
 			<div class="callout callout-info" style="margin-bottom: 0!important;">
@@ -33,7 +33,7 @@
 		 	</div>
 		</div>
 	</c:if>
-</c:if>
+</sec:authorize>
 
 
 <!--  DETTAGLI TICKET -->    
@@ -115,12 +115,12 @@
 				        </div>
 				     </div>
 				       
-				    <c:if test = "${account.ruolo.name == 'ROLE_OPERATORE'}">
+					<sec:authorize access="hasRole('ROLE_OPERATORE')">
 					 <div class="row">
 					   <div class="col-xs-12">
 					   	 <c:choose>
 							<c:when test="${ticket.statoTicket.id == 1}">
-							   <a href="${pageContext.request.contextPath}/ticket/aggiorna_stato/${ticket.id}/o01">
+							   <a href="${pageContext.request.contextPath}/ticket/aggiorna_stato/${ticket.id}">
 							        <button type="button" class="btn btn-primary pull-right">
 							         <i class="fa fa-fw fa-wrench"></i> 
 							         Prendi in carico ticket
@@ -128,7 +128,7 @@
 							      </a>
 							</c:when>
 							<c:when test="${ticket.statoTicket.id == 2}">
-							  	<a href="${pageContext.request.contextPath}/ticket/aggiorna_stato/${ticket.id}/o01">
+							  	<a href="${pageContext.request.contextPath}/ticket/aggiorna_stato/${ticket.id}">
 							        <button type="button" class="btn btn-danger pull-right">
 							         <i class="fa fa-fw fa-close"></i> 
 							         Chiudi ticket
@@ -138,7 +138,7 @@
 						</c:choose>
 					   </div>
 					 </div>
-					</c:if>
+					</sec:authorize>
 					
 				</section>
             </div>

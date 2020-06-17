@@ -1,7 +1,16 @@
 package com.psss.ticketsystem.services;
 
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.psss.ticketsystem.entities.Utente;
 import com.psss.ticketsystem.repositories.UtenteRepository;
@@ -11,6 +20,19 @@ public class UtenteServiceImpl implements UtenteService{
 	
 	@Autowired
 	private UtenteRepository utenteRepository;
+	
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
+		Utente utente = utenteRepository.findByUsername(username);
+		if(utente == null) {
+			throw new UsernameNotFoundException("Username non trovato per " + username);
+		}
+		List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+		System.out.println(utente.getRuolo().getName());
+		grantedAuthorities.add(new SimpleGrantedAuthority(utente.getRuolo().getName()));
+		return new User(utente.getUsername(), utente.getPassword(), grantedAuthorities);
+	}
+
 	
 	@Override
 	public Utente findByUsername(String username) {

@@ -37,8 +37,6 @@
   <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   
 
- 
-
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
@@ -58,7 +56,6 @@
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           
-         
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -77,7 +74,7 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-right">
-                  <a href="" class="btn btn-default btn-flat">Log out</a>
+                  <a href="${pageContext.request.contextPath}/process-logout" class="btn btn-default btn-flat">Log out</a>
                 </div>
               </li>
             </ul>
@@ -105,7 +102,7 @@
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">MENU PRINCIPALE</li>
         
-        <c:if test = "${account.ruolo.name == 'ROLE_CLIENTE'}">
+        <sec:authorize access="hasRole('ROLE_CLIENTE')">
         	<li class="treeview">
 	          <a href="#">
 	            <i class="fa fa-laptop"></i>
@@ -116,11 +113,12 @@
 	          </a>
 	          <ul class="treeview-menu">
 	            <li><a href="${pageContext.request.contextPath}/ticket/send"><i class="fa fa-circle-o"></i> Nuovo Ticket</a></li>
+	            <li><a href="${pageContext.request.contextPath}/ticket/history_cliente"><i class="fa fa-circle-o"></i> Lista Ticket</a></li>
 	          </ul>
 	        </li>
-        </c:if>
+        </sec:authorize>
         
-        <c:if test = "${account.ruolo.name == 'ROLE_OPERATORE'}">
+        <sec:authorize access="hasRole('ROLE_OPERATORE')">
         	<li class="treeview">
 	          <a href="#">
 	            <i class="fa fa-laptop"></i>
@@ -130,10 +128,12 @@
 	            </span>
 	          </a>
 	          <ul class="treeview-menu">
+	            <li><a href="${pageContext.request.contextPath}/ticket/history_aperti"><i class="fa fa-circle-o"></i> Lista ticket aperti</a></li>
+	            <li><a href="${pageContext.request.contextPath}/ticket/history_operatore"><i class="fa fa-circle-o"></i> Lista ticket assegnati</a></li>
 	          </ul>
 	          
 	        </li>
-        </c:if>
+        </sec:authorize>
         
       </ul>
     </section>
@@ -156,7 +156,7 @@
     reserved.
   </footer>
   
-  		
+
 </div>
 <!-- ./wrapper -->
 

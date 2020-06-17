@@ -2,6 +2,8 @@ package com.psss.ticketsystem.controllers;
 
 
 import java.util.Date;
+import java.util.List;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +38,9 @@ public class TicketController implements ServletContextAware{
 	private UtenteService utenteService;
 	
 	@RequestMapping(value= "send", method=RequestMethod.GET)
-	public String send(ModelMap modelMap) {
+	public String send(ModelMap modelMap, Authentication authentication) {
 		Ticket ticket = new Ticket();
-		Utente account = utenteService.findByUsername("c01");
+		Utente account = utenteService.findByUsername(authentication.getName());
 		
 		modelMap.put("ticket", ticket);
 		modelMap.put("account", account);
@@ -46,11 +48,10 @@ public class TicketController implements ServletContextAware{
 	}
 	
 	@RequestMapping(value= "send", method=RequestMethod.POST)
-	public String send(@ModelAttribute("ticket") Ticket ticket, RedirectAttributes redirectAttributes) {
+	public String send(@ModelAttribute("ticket") Ticket ticket, Authentication authentication, RedirectAttributes redirectAttributes) {
 		try {
 			if (!ticket.getTitle().equals("") && !ticket.getDescription().equals("")) {
-				Utente account = utenteService.findByUsername("c01");
-				System.out.println(account.getId());
+				Utente account = utenteService.findByUsername(authentication.getName());
 				ticket.setCreatedDate(new Date());
 				ticket.setCliente(account);
 				StatoTicketAperto statoAperto = new StatoTicketAperto();
@@ -68,9 +69,35 @@ public class TicketController implements ServletContextAware{
 		return "redirect:/ticket/send";
 	}	
 	
-	@RequestMapping(value= "details/{id}/{username}", method=RequestMethod.GET)
-	public String details(@PathVariable("id") int id, @PathVariable("username") String username, ModelMap modelMap, Authentication authentication) {
-		Utente account = utenteService.findByUsername(username);
+	@RequestMapping(value= "history_aperti", method=RequestMethod.GET)
+	public String history_aperti(ModelMap modelMap, Authentication authentication) {
+		Utente account = utenteService.findByUsername(authentication.getName());
+		modelMap.put("account", account);
+		modelMap.put("tickets", ticketService.cercaTicketStatoAperto());
+		return "ticket.history";
+	}
+	
+	@RequestMapping(value= "history_cliente", method=RequestMethod.GET)
+	public String history_cliente(Authentication authentication, ModelMap modelMap) {
+		Utente cliente = utenteService.findByUsername(authentication.getName());
+		List<Ticket> tickets = ticketService.cercaTicketCliente(cliente.getUsername());		// Tutti i ticket del cliente
+		
+		modelMap.put("tickets", tickets);
+		modelMap.put("account", cliente);
+		return "ticket.history";
+	}
+	
+	@RequestMapping(value= "history_operatore", method=RequestMethod.GET)
+	public String history_operatore(Authentication authentication, ModelMap modelMap) {
+		Utente account = utenteService.findByUsername(authentication.getName());
+		modelMap.put("account", account);
+		modelMap.put("tickets", ticketService.cercaTicketOperatore(authentication.getName()));
+		return "ticket.history";
+	}
+	
+	@RequestMapping(value= "details/{id}", method=RequestMethod.GET)
+	public String details(@PathVariable("id") int id, ModelMap modelMap, Authentication authentication) {
+		Utente account = utenteService.findByUsername(authentication.getName());
 		Ticket ticket = ticketService.findTicket(id);
 		
 		modelMap.put("ticket", ticket);
@@ -78,10 +105,10 @@ public class TicketController implements ServletContextAware{
 		return "ticket.details";
 	}
 	
-	@RequestMapping(value= "aggiorna_stato/{id}/{username}")
-	public String aggiorna_stato(@PathVariable("username") String username, @PathVariable("id") int id, ModelMap modelMap, RedirectAttributes redirectAttributes) {
+	@RequestMapping(value= "aggiorna_stato/{id}")
+	public String aggiorna_stato(Authentication authentication, @PathVariable("id") int id, ModelMap modelMap, RedirectAttributes redirectAttributes) {
 		try {
-			Utente operatore = utenteService.findByUsername(username);
+			Utente operatore = utenteService.findByUsername(authentication.getName());
 			Ticket ticket = ticketService.findTicket(id);
 			
 			
@@ -103,15 +130,15 @@ public class TicketController implements ServletContextAware{
 				ticketService.save(ticket);
 				
 				redirectAttributes.addFlashAttribute("success", "Stato ticket aggiornato a: " + ticket.getStatoTicket().getName());
-				return "redirect:/ticket/details/{id}/{username}";
+				return "redirect:/ticket/details/{id}";
 			} else {
-				redirectAttributes.addFlashAttribute("err", "Il ticket è stato preso in carico da un altro operatore.");
-				return "redirect:/ticket/details/{id}/{username}";
+				redirectAttributes.addFlashAttribute("err_ticket", "Il ticket è stato preso in carico da un altro operatore.");
+				return "redirect:/ticket/history_operatore";
 			}
 		
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("err", "Errore presa in carico del ticket.");
-			return "redirect:/ticket/details/{id}/{username}";
+			return "redirect:/ticket/details/{id}";
 		}	
 	}
 			
