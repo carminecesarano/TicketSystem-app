@@ -10,7 +10,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
 	</parent>
 	<groupId>com.psss.TicketSystem</groupId>
 	<artifactId>TicketSystem</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0</version>
 	<name>TicketSystem</name>
 	<description>TicketSystem</description>
 	<packaging>war</packaging> 
@@ -60,6 +60,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
 			</exclusions>
 		</dependency>
 		
+			
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -88,7 +89,19 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>jstl</artifactId>
 		</dependency>
-		
+		    	
+		    	
+    	<!-- Web Sockets -->
+	    <dependency>
+	      <groupId>org.springframework.boot</groupId>
+	      <artifactId>spring-boot-starter-websocket</artifactId>
+	    </dependency>
+	    
+	    <dependency>
+	      <groupId>org.springframework</groupId>
+	      <artifactId>spring-messaging</artifactId>
+	    </dependency>
+	
 	    <dependency>
 	      <groupId>org.springframework.boot</groupId>
 	      <artifactId>spring-boot-starter-integration</artifactId>

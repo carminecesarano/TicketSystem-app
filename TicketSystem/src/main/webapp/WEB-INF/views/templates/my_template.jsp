@@ -36,6 +36,10 @@
   <!-- bootstrap wysihtml5 - text editor -->
   <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   
+  <script src="${pageContext.request.contextPath}/resources/plugins/socket/sockjs-0.3.4.min.js"></script>
+  <script src="${pageContext.request.contextPath}/resources/plugins/socket/stomp.min.js"></script>
+  <script src="${pageContext.request.contextPath}/resources/plugins/socket/jquery-1.11.2.min.js"></script>
+ 
 
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -56,6 +60,40 @@
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           
+          
+          <sec:authorize access="hasRole('ROLE_CLIENTE')">
+	          <!-- Notifications: style can be found in dropdown.less -->
+	          <li class="dropdown notifications-menu">
+	            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+	              <i class="fa fa-bell-o"></i>
+	              <span class="label label-danger" id="number">${notifiche.size()}</span>
+	            </a>
+	            <ul class="dropdown-menu">
+	              <li class="header">Hai <label id="number1">${notifiche.size()}</label> notifiche non lette</li>
+	              <li>
+	                <!-- inner menu: contains the actual data -->
+	                <ul class="menu">
+	                  
+	                  <li class="row-notifica">
+	                  </li>
+	                  
+	                  <c:forEach var="notifica" items="${notifiche}">
+		                  	<c:choose>
+							    <c:when test = "${fn:contains(notifica.content, 'chiuso')}">
+							        <li><a href="#"><i class="fa fa-close text-red"></i>${notifica.content}</a></li>
+							    </c:when>    
+							    <c:otherwise>
+							        <li><a href="#"><i class="fa fa-wrench text-yellow"></i>${notifica.content}</a></li>
+							    </c:otherwise>
+							</c:choose>
+	                  </c:forEach>
+	                    
+	                </ul>
+	              </li>
+	            </ul>
+	          </li>
+         </sec:authorize>
+         
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -156,6 +194,61 @@
     reserved.
   </footer>
   
+  		<script>
+	
+	      /** Open the web socket connection and subscribe the "/notify" channel.*/
+	      function connect() {
+	
+	        // Create and init the SockJS object
+	        var socket = new SockJS('/ws');
+	        var stompClient = Stomp.over(socket);
+	
+	        // Subscribe the '/notify' channel
+	        stompClient.connect({}, function(frame) {
+	          stompClient.subscribe('/user/queue/notify', callback);
+	        });
+	        
+	        return;
+	      } 
+
+		  callback = function(notifica) {
+	            // Call the notify function when receive a notification
+	            notify(JSON.parse(notifica.body).content);
+	      }
+	      
+	      /** Display the notification message.*/
+	      function notify(notifica) {
+	    	var stato = notifica.search("chiuso");
+	    	if (stato == -1) {
+	    		var domElement = '<li><a href="#"><i class="fa fa-wrench text-yellow"></i>' + String(notifica) + '</a></li>';
+	    	} else {
+	    		var domElement = '<li><a href="#"><i class="fa fa-close text-red"></i>' + String(notifica) + '</a></li>';
+	    	}
+	        $(".row-notifica").eq(-1).after(domElement);
+
+	        var value = parseInt(document.getElementById('number').textContent.match(/\d+$/)[0], 10);
+	        value++;
+	        document.getElementById('number').textContent = value;
+	        document.getElementById('number1').textContent = value;
+	        
+
+	        let src = '${pageContext.request.contextPath}/resources/sound/notification.mp3';
+	        let audio = new Audio(src);
+	        audio.play();
+	        
+	        return;
+	      }
+	      
+	      /*** Init operations.*/
+	      $(document).ready(function() {
+	        
+	        // Start the web socket connection.
+	        connect();
+	        
+	      });
+	
+	    </script>
+
 
 </div>
 <!-- ./wrapper -->
