@@ -1,5 +1,5 @@
-# Ticket System
-Ticket System project for PSSS exam
+# Ticket System app
+Design and Development of a web application in Java Spring application for the assistance tickets management
 
 **accounts credential**  
 operatore:  o01         pass:123  
